@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app_practice/provider/product_provider.dart';
 import 'package:shop_app_practice/screens/edit_product_screen.dart';
+import 'package:provider/provider.dart';
 
 class UserProductDesign extends StatelessWidget {
   final String id;
@@ -10,6 +12,7 @@ class UserProductDesign extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffold = Scaffold.of(context);
     return Card(
       elevation: 5.0,
       child: ListTile(
@@ -27,7 +30,8 @@ class UserProductDesign extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                 ),
                 onPressed: () {
-                  Navigator.of(context).pushNamed(EditProductScreen.routeName,arguments: id);
+                  Navigator.of(context)
+                      .pushNamed(EditProductScreen.routeName, arguments: id);
                 },
               ),
               IconButton(
@@ -35,7 +39,18 @@ class UserProductDesign extends StatelessWidget {
                   Icons.delete,
                   color: Theme.of(context).errorColor,
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  try {
+                    await Provider.of<ProductProvider>(context, listen: false)
+                        .deleteProduct(id);
+                  } catch (error) {
+                    scaffold.showSnackBar(
+                      SnackBar(
+                        content: Text('Deleting Failed!',textAlign: TextAlign.center,),
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
