@@ -33,20 +33,15 @@ class CartItemScreen extends StatelessWidget {
                   Chip(
                     backgroundColor: Theme.of(context).primaryColor,
                     label: Text(
-                      '\$${cartItem.totalAmount}',
-                      style: TextStyle(color: Theme.of(context).primaryTextTheme.headline6.color),
+                      '\$${cartItem.totalAmount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .primaryTextTheme
+                              .headline6
+                              .color),
                     ),
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      order.addOrders(cart.values.toList(), cartItem.totalAmount);
-                      cartItem.clearCart();
-                    },
-                    child: Text(
-                      'Order Now',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  )
+                  FlatWidget(cartItem: cartItem, order: order, cart: cart)
                 ],
               ),
             ),
@@ -69,6 +64,53 @@ class CartItemScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class FlatWidget extends StatefulWidget {
+  const FlatWidget({
+    Key key,
+    @required this.cartItem,
+    @required this.order,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cartItem;
+  final Order order;
+  final Map<String, CartItem> cart;
+
+  @override
+  _FlatWidgetState createState() => _FlatWidgetState();
+}
+
+class _FlatWidgetState extends State<FlatWidget> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: (widget.cartItem.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await widget.order.addOrders(
+                widget.cart.values.toList(),
+                widget.cartItem.totalAmount,
+              );
+              setState(() {
+                _isLoading = false;
+              });
+              widget.cartItem.clearCart();
+            },
+      child: _isLoading
+          ? CircularProgressIndicator()
+          : Text(
+              'Order Now',
+              style: TextStyle(fontSize: 16.0),
+            ),
     );
   }
 }

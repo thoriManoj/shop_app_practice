@@ -7,19 +7,20 @@ import 'package:provider/provider.dart';
 
 class UserProductScreen extends StatefulWidget {
   static const routeName = '/user-product-screen';
+
   @override
   _UserProductScreenState createState() => _UserProductScreenState();
 }
 
 class _UserProductScreenState extends State<UserProductScreen> {
-
   Future<void> _fetchProducts(BuildContext context) async {
-    await Provider.of<ProductProvider>(context,listen: false).fetchAndSetData();
+    await Provider.of<ProductProvider>(context, listen: false)
+        .fetchAndSetData(true);
   }
-
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<ProductProvider>(context);
+    //final productData = Provider.of<ProductProvider>(context);
+    print('rebuilding...');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Products'),
@@ -33,18 +34,28 @@ class _UserProductScreenState extends State<UserProductScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () => _fetchProducts(context),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView.builder(
-            itemBuilder: (context, index) => UserProductDesign(
-                productData.getItems[index].id,
-                productData.getItems[index].title,
-                productData.getItems[index].imageUrl),
-            itemCount: productData.getItems.length,
-          ),
-        ),
+      body: FutureBuilder(
+        future: _fetchProducts(context),
+        builder: (ctx, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => _fetchProducts(context),
+                    child: Consumer<ProductProvider>(
+                      builder: (ctx,productsData, _) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.builder(
+                          itemBuilder: (context, index) => UserProductDesign(
+                              productsData.getItems[index].id,
+                              productsData.getItems[index].title,
+                              productsData.getItems[index].imageUrl),
+                          itemCount: productsData.getItems.length,
+                        ),
+                      ),
+                    ),
+                  ),
       ),
     );
   }

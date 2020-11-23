@@ -24,7 +24,7 @@ class _OrderDesignState extends State<OrderDesign> {
         children: [
           ListTile(
             title: Text(
-              '\$${widget.orderItem.amount}',
+              '\$${widget.orderItem.amount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 16.0),
             ),
             subtitle: Text(
